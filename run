@@ -1,0 +1,2 @@
+#!/bin/bash
+rustc -o demo $1 && ./demo
