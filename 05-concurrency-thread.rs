@@ -65,12 +65,8 @@ fn handle_client(mut src_stream: TcpStream, dest_addr: &str){
                     break;
                 }
                 let _ = dest_stream.write(&src_buf[0..byte_count]);
-                //println!("{:?}", &buf[0 .. byte_count]);
             }
             Err(e) => {
-                //println!("Error: {:?}", e);
-                //stream.shutdown(Shutdown::Both);
-                //break;
             }
         }
 
@@ -82,12 +78,8 @@ fn handle_client(mut src_stream: TcpStream, dest_addr: &str){
                     break;
                 }
                 let _ = src_stream.write(&dest_buf[0..byte_count]);
-                //println!("{:?}", &buf[0 .. byte_count]);
             }
             Err(e) => {
-                //println!("Error: {:?}", e);
-                //stream.shutdown(Shutdown::Both);
-                //break;
                 thread::sleep(time::Duration::from_millis(5));
             }
         }
