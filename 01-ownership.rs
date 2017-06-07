@@ -20,14 +20,19 @@ fn main(){
     }
 
     let apple_a = Apple{ price: 1.0, weight: 12.5};
+    println!("=== Ownership ===");
+    println!("apple_a: {:?}", apple_a); 
     let mut apple_b = apple_a; // Ownership move from apple_a -> apple_b 
     apple_b.price = 22.5;
+    apple_b.weight = 3.4;
     let apple_c = &apple_b; // apple_c borrows apple_b
     let apple_d = &apple_b; // apple_c borrows apple_b
 
     println!("=== Ownership changed ===");
     //println!("apple_a: {:?}", apple_a); // uncomment and see what happen
     println!("apple_b: {:?}", apple_b);
+
+    println!("=== Borrows ===");
     println!("apple_c: {:?}", apple_c);
     println!("apple_d: {:?}", apple_d);
 
