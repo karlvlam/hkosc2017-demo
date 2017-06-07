@@ -10,10 +10,12 @@ fn main(){
 
     let src_addr = "0.0.0.0:12345";
     let dest_addr = "127.0.0.1:22";
+    // listener thread
     thread::spawn( move|| {
         start_listener(src_addr, dest_addr);
     });
 
+    // just keep the program running.
     loop {
         thread::sleep(time::Duration::from_millis(3600000));
     }
@@ -46,6 +48,7 @@ fn start_listener(src_addr: &str, dest_addr: &str) {
 
 fn pass_bytes(mut stream: TcpStream, tx: Sender<TcpBuffer>, rx: Receiver<TcpBuffer>) {
     let mut buf: [u8; 128] = [0; 128];
+    // keep reading data and push to other stream
     loop {
         let res = stream.read(&mut buf);
         match res {
@@ -54,14 +57,19 @@ fn pass_bytes(mut stream: TcpStream, tx: Sender<TcpBuffer>, rx: Receiver<TcpBuff
                     stream.shutdown(Shutdown::Both);
                     break;
                 }
+                // copy any received data to the TcpBuffer, with byte count
+                // Then send to the opposite side
                 tx.send(TcpBuffer{data:buf, length:byte_count});
             }
             Err(e) => {
+                // read() will return error if no data, 
+                // just sleep some time in order to release cpu resource
                 thread::sleep(time::Duration::from_millis(5));
             }
         }
         match rx.try_recv() {
             Ok(TcpBuffer{data, length}) => {
+                // simple, just write any received data to the stream
                 stream.write(&data[0..length]);
             }
             Err(e) => {
@@ -74,6 +82,7 @@ fn pass_bytes(mut stream: TcpStream, tx: Sender<TcpBuffer>, rx: Receiver<TcpBuff
 
 fn handle_client(src_stream: TcpStream, dest_addr: &str){
 
+    // create channels for both side 
     let (dest_tx, dest_rx) : (Sender<TcpBuffer>, Receiver<TcpBuffer>) = channel();
     let (src_tx, src_rx) : (Sender<TcpBuffer>, Receiver<TcpBuffer>) = channel();
 
@@ -90,9 +99,11 @@ fn handle_client(src_stream: TcpStream, dest_addr: &str){
         }
     }
 
+    // set non-blocking for both stream
     let _ = src_stream.set_nonblocking(true);
     let _ = dest_stream.set_nonblocking(true);
 
+    // start threads to copy data between 2 streams 
     thread::spawn( move|| {
         pass_bytes(src_stream, dest_tx, src_rx);
     });
