@@ -27,9 +27,9 @@ struct Rect{
 }
 
 trait Shape {
-    fn area(&self) -> f64; 
+    fn area(&self) -> f64; // define function signature 
 
-    // default function
+    // default function body, override when needed
     fn is_larger(&self, other:&Self) -> bool{
         self.area() > other.area()
     }
@@ -49,3 +49,4 @@ impl Shape for Rect{
     }
 
 }
+
