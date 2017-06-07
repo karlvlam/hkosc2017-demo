@@ -19,6 +19,8 @@ fn main(){
         weight: f64, 
     }
 
+    println!("");
+
     let apple_a = Apple{ price: 1.0, weight: 12.5};
     println!("=== Ownership ===");
     println!("apple_a: {:?}", apple_a); 
@@ -32,9 +34,22 @@ fn main(){
     //println!("apple_a: {:?}", apple_a); // uncomment and see what happen
     println!("apple_b: {:?}", apple_b);
 
+    println!("");
+
     println!("=== Borrows ===");
     println!("apple_c: {:?}", apple_c);
     println!("apple_d: {:?}", apple_d);
 
 
+
+    println!("");
+
+    println!("=== Borrows mut ===");
+    let mut apple_a = Apple{ price: 33.0, weight: 3.5}; // reuse the binding
+    println!("apple_a: {:?}", apple_a);
+    let apple_b = &mut apple_a;
+    //let apple_c = &mut apple_a; // uncomment and see what happen
+    println!("=== Borrows mut ===");
+    apple_b.price = 2.0;
+    println!("apple_b: {:?}", apple_b);
 }
