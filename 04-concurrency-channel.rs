@@ -55,18 +55,13 @@ fn pass_bytes(mut stream: TcpStream, tx: Sender<TcpBuffer>, rx: Receiver<TcpBuff
                     break;
                 }
                 tx.send(TcpBuffer{data:buf, length:byte_count});
-                //println!("{:?}", &buf[0 .. byte_count]);
             }
             Err(e) => {
-                //println!("Error: {:?}", e);
-                //stream.shutdown(Shutdown::Both);
-                //break;
                 thread::sleep(time::Duration::from_millis(5));
             }
         }
         match rx.try_recv() {
             Ok(TcpBuffer{data, length}) => {
-                //println!("GET: {:?}", byte);
                 stream.write(&data[0..length]);
             }
             Err(e) => {
@@ -95,8 +90,8 @@ fn handle_client(src_stream: TcpStream, dest_addr: &str){
         }
     }
 
-    src_stream.set_nonblocking(true);
-    dest_stream.set_nonblocking(true);
+    let _ = src_stream.set_nonblocking(true);
+    let _ = dest_stream.set_nonblocking(true);
 
     thread::spawn( move|| {
         pass_bytes(src_stream, dest_tx, src_rx);
