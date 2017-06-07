@@ -1,7 +1,7 @@
 fn main(){
-    for number in 0..31 {
+    for number in 0..32 { // 0 to 31
         let result = match number {
-            1 => "咪一囉！",
+            1 => "咪一囉！", // expression
             2|3|5|7 => "質數啲Friend!",
             18|22 => "傳說中的十八、廿二",
             30...39 => "三張嘢……",
