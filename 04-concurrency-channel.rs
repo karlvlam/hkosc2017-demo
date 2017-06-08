@@ -46,6 +46,38 @@ fn start_listener(src_addr: &str, dest_addr: &str) {
     }
 }
 
+fn handle_client(src_stream: TcpStream, dest_addr: &str){
+
+    // create channels for both side 
+    let (dest_tx, dest_rx) : (Sender<TcpBuffer>, Receiver<TcpBuffer>) = channel();
+    let (src_tx, src_rx) : (Sender<TcpBuffer>, Receiver<TcpBuffer>) = channel();
+
+    let dest_connection = TcpStream::connect(dest_addr);
+    let dest_stream;
+
+    match dest_connection{
+        Ok(stream) => {
+            dest_stream = stream;
+        }
+        Err(_) => {
+            println!("Dest Error!");
+            return;
+        }
+    }
+
+    // set non-blocking for both stream
+    let _ = src_stream.set_nonblocking(true);
+    let _ = dest_stream.set_nonblocking(true);
+
+    // start threads to copy data between 2 streams 
+    thread::spawn( move|| {
+        pass_bytes(src_stream, dest_tx, src_rx);
+    });
+    thread::spawn( move|| {
+        pass_bytes(dest_stream, src_tx, dest_rx);
+    });
+}
+
 fn pass_bytes(mut stream: TcpStream, tx: Sender<TcpBuffer>, rx: Receiver<TcpBuffer>) {
     let mut buf: [u8; 128] = [0; 128];
     // keep reading data and push to other stream
@@ -80,34 +112,4 @@ fn pass_bytes(mut stream: TcpStream, tx: Sender<TcpBuffer>, rx: Receiver<TcpBuff
     }
 }
 
-fn handle_client(src_stream: TcpStream, dest_addr: &str){
 
-    // create channels for both side 
-    let (dest_tx, dest_rx) : (Sender<TcpBuffer>, Receiver<TcpBuffer>) = channel();
-    let (src_tx, src_rx) : (Sender<TcpBuffer>, Receiver<TcpBuffer>) = channel();
-
-    let dest_connection = TcpStream::connect(dest_addr);
-    let dest_stream;
-
-    match dest_connection{
-        Ok(stream) => {
-            dest_stream = stream;
-        }
-        Err(_) => {
-            println!("Dest Error!");
-            return;
-        }
-    }
-
-    // set non-blocking for both stream
-    let _ = src_stream.set_nonblocking(true);
-    let _ = dest_stream.set_nonblocking(true);
-
-    // start threads to copy data between 2 streams 
-    thread::spawn( move|| {
-        pass_bytes(src_stream, dest_tx, src_rx);
-    });
-    thread::spawn( move|| {
-        pass_bytes(dest_stream, src_tx, dest_rx);
-    });
-}
